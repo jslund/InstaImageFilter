@@ -1,10 +1,21 @@
 import pika
+from Helpers.GoogleVisionClient import GoogleVisionClient
+from Helpers.RabbiqMQPublisher import RabbitMQPublisher
 
 
 class RabbitMQConsumer:
 
     def callback(self, ch, method, properties, body):
-        print("Consumed " + str(body))
+        body_string = body.decode()
+        print("Starting filtering " + body_string)
+        client = GoogleVisionClient(body_string)
+        client.fetch_tags()
+        if client.validate("Dog"):
+            publisher = RabbitMQPublisher(rabbitmq_host=self.rabbitmq_host, queue_name="valid_images")
+            publisher.Publish(message=body)
+            print("Accepted")
+        else:
+            print("Rejected")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def __init__(self, rabbitmq_host: str, queue_name: str):

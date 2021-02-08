@@ -1,7 +1,7 @@
 import pika
 
 
-class RabbitMQCPublisher:
+class RabbitMQPublisher:
 
     def __init__(self, rabbitmq_host: str, queue_name: str):
         self.rabbitmq_host = rabbitmq_host
